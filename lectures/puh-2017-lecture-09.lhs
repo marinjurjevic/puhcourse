@@ -3,24 +3,22 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2016/2017
+Academic Year 2017/2018
 
 LECTURE 9: Custom data types 1
 
 v1.0
 
-(c) 2016 Jan Šnajder
+(c) 2017 Jan Šnajder
 
 ==============================================================================
 
 > import Data.List
-> import Data.Ord   (comparing)
-
 
 === RECAP ====================================================================
 
 In the first half of the course, we focused on functions: we learned how to
-define them in various way, how to define higher order functions, how to use
+define them in various ways, how to define higher order functions, how to use
 these to abstract useful functional patterns, and how to combine them into more
 complex functions. However, we restricted ourselves to using standard built-in
 types. In real-life scenarios, we will need to define more complex types, even
@@ -163,36 +161,20 @@ totally OK (and in fact common for types with only one data constructor).
 - Define a 'Date' structure with the appropriate fields.
 - Define a function that shows a date in the DD.MM.YYYY format (without
   leading zeroes).
-  showDate :: Date -> String
-
-> data Date = Date Int Int Int deriving Show
-
-> showDate :: Date -> String
-> showDate (Date d m y) = (show d) ++ "." ++ (show m) ++ "." ++ (show y) ++ "."
+showDate :: Date -> String
 
 1.2.
 - Define a function
   translate :: Point -> Shape2 -> Shape2
   that translates a shape into the direction of vector (x,y).
 
-> translate :: Point -> Shape2 -> Shape2
-> translate (Point x y) (Circle2 (Point x1 y1) r)  = Circle2 ( Point (x + x1) (y + y1) ) r
-> translate (Point x y) (Rectangle2 (Point x1 y1) (Point x2 y2) ) = Rectangle2 (Point (x1 +x) (y1 + y) ) (Point (x2 + x) (y2 + x))
-
 1.3.
 - Write a function 'inShape' that tests whether a point is contained within a
   given shape (or is on its border).
-
-> inShape :: Shape2 -> Point -> Bool
-> inShape (Rectangle2 (Point x1 y1) (Point x2 y2) ) (Point xp yp) = xp >= x1 && yp >= y1 && xp <= x2 && yp <= y2
-> inShape (Circle2 (Point x1 y1) r ) (Point xp yp) = (xp - x1)^2 + (yp - y1)^2 <= r^2
-
+  inShape :: Shape2 -> Point -> Bool
 - Write a function 'inShapes' that tests if the point is within any shape from
   the list of shapes.
   inShapes :: [Shape2] -> Point -> Bool
-
-> inShapes :: [Shape2] -> Point -> Bool
-> inShapes xs p = foldr (\s z -> inShape s p && z) True xs
 
 1.4.
 - Define your type 'Vehicle' that can be a 'Car', 'Truck', 
@@ -200,24 +182,6 @@ totally OK (and in fact common for types with only one data constructor).
   (String) and horsepower (Double).
 - Write a function 'totalHorsepower' that adds up the horsepower of the
   vehicles, assuming that bicycle's horsepower is 0.2.
-
-> type Manufacturer = String
-> type HorsePower = Double
-
-> data Vehicle = Car Manufacturer HorsePower
->  | Truck Manufacturer HorsePower
->  | Motorcycle Manufacturer HorsePower
->  | Bicycle Manufacturer
-
-> getHP :: Vehicle -> Double
-> getHP (Car _ hp) = hp
-> getHP (Truck _ hp) = hp
-> getHP	(Motorcycle _ hp) = hp
-> getHP (Bicycle _) = 1.2
-
-> totalHorsepower :: [Vehicle] -> Double
-> totalHorsepower xs = foldr (\x z -> z + getHP x) 0 xs
-
 
 === RECORDS ==================================================================
 
@@ -246,7 +210,7 @@ This automatically gives us:
 
   firstName :: Student -> String
   lastName  :: Student -> String
-  studentId :: Student -> String:
+  studentId :: Student -> String
   level     :: Student -> Level
   avgGrade  :: Student -> Double
 
@@ -311,35 +275,17 @@ We can define a record in a shorter way, respecting the order of the fields:
 
 2.1.
 - Define a function that increases the average grade of the student by 1.0,
-but not above 5.0.
+  but not above 5.0.
   improveStudent :: Student -> Student
-
-> improveStudent :: Student -> Student
-> improveStudent s = s { avgGrade = min 5.0 (1.0 + avgGrade s) } 
-
 2.2.
 - Write a function to compute the average grade of students for the different
   study levels.
   avgGradePerLevels :: [Student] -> (Double, Double, Double)
 
-> average :: (Real a, Fractional b) => [a] -> b
-> average [] = 0
-> average xs = realToFrac (sum xs) / genericLength xs
-
-> listToTuple (x:y:z:xs) = (x,y,z)
-
-
 2.3.
 - Write a function that returns a list of matriculation numbers for a given
   study level, sorted by average grade in descending order.
-  rankedStudents :: Level -> [Student] -> [String]
-
-> rankedStudents :: Level -> [Student] -> [String]
-> rankedStudents l = map studentId . sortBy (flip (comparing avgGrade)). filter (\s -> level s == l)
-
-> sortByAvgGrade :: [Student] -> [Student]
-> sortByAvgGrade = sortBy (flip (comparing avgGrade))
-
+  rankedStudents :: Level -> [Students] -> [String]
 
 2.4.
 - Write a function
@@ -494,7 +440,7 @@ Consider the following data structures:
 >   , streetNumber :: Int
 >   , zipCode      :: String
 >   , city         :: String } 
->   deriving (Eq,Show)
+>   deriving (Eq, Show)
 
 > c1 = Customer "Ivo" 22 (Just $ Address "Bauerova" 10 "10000" "Zagreb")
 > c2 = Customer "Ana" 30 Nothing
@@ -533,7 +479,8 @@ We now can define:
 > customerCity2 = fmap city . customerAddress
 
 > customerStreet2 :: Customer -> Maybe (String,Int)
-> customerStreet2 = fmap (\(Address s n _ _) -> (s, n)) . customerAddress
+> customerStreet2 = 
+>   fmap (\(Address s n _ _) -> (s, n)) . customerAddress
 
 == NEXT =======================================================================
 

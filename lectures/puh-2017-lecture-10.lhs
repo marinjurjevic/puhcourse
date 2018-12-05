@@ -3,13 +3,13 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2015/2016
+Academic Year 2017/2018
 
 LECTURE 10: Custom data types 2
 
 v1.1
 
-(c) 2016 Jan Šnajder
+(c) 2017 Jan Šnajder
 
 ==============================================================================
 
@@ -38,7 +38,7 @@ recursive.
 >   sex      :: Sex,
 >   age      :: Int,
 >   partner  :: Maybe Person,
->   children :: [Person] } deriving (Read,Ord)
+>   children :: [Person] } deriving (Show,Read,Ord) -- Eq
 
 Let's look at one family situation: Pero and Ana are Marko's parents, Marko and
 Maja are dating...
@@ -64,7 +64,7 @@ What's going on here?
 
 The first comparison works just fine, while the second one never terminates
 because 'pero' is an infinite structure. (Why does the first computation work
-then?) // because haskell is lazy
+then?)
 
 Let's write a function to return a name of one's partner, if such exists:
 
@@ -117,10 +117,8 @@ Here's the first approach:
 >   children2 :: [Person2] } deriving (Show,Read,Eq,Ord)
 
 > john = Person2 "123" "John" "Doe" Male Nothing Nothing (Just jane) []
-> jane = Person2 "623" "Jane" "Fox" Female (Just ann) (Just joe) (Just john) []
+> jane = Person2 "623" "Jane" "Fox" Female (Just ann) Nothing (Just john) []
 > ann  = Person2 "343" "Ann"  "Doe" Female Nothing Nothing Nothing [jane]
-> joe  = Person2 "111" "Joe"  "Doe" Male Nothing Nothing (Just ann) [jane, mia]
-> mia  = Person2 "000" "Iva"  "Doe" Female Nothing (Just joe) Nothing []
 
 === EXERCISE 1 ===============================================================
 
@@ -132,17 +130,10 @@ Here's the first approach:
   parentCheck :: Person2 -> Bool
   that checks whether the given person is one of the children of its parents.
 
-
-> parentCheck :: Person2 -> Bool
-> parentCheck p2 = (personId2 p2) `elem` nub ( (pairsChildren2 $ father2 p2) ++ (pairsChildren2 $ mother2 p2))
-
->   where pairsChildren2 p = map (personId2) $ ( maybe [] children2 p)
-
 1.3.
 - Define a function
   sister :: Person2 -> Maybe Person2
   that returns the sister of a person, if such exists.
-
 
 1.4.
 - Define a function that returns all descendants of a person.
@@ -153,7 +144,7 @@ Here's the first approach:
 We already know that a list is also a recursive structure. Moreover, it is a
 parametrized recursive structure. Let's define our own list data type:
 
-> data MyList a = Empty | Cons a (MyList a) deriving (Show,Read,Ord)
+> data MyList a = Empty | Cons a (MyList a) deriving (Show,Read,Ord,Eq)
 
 Now we can define some lists:
 
@@ -180,17 +171,9 @@ We can now write:
 - Define
   listHead :: MyList a -> Maybe a
 
-> listHead :: MyList a -> Maybe a
-> listHead Empty = Nothing
-> listHead (x `Cons` xs) = Just x
-
 2.2.
 - Define a function that works like 'map' but works on a 'MyList' type:
   listMap :: (a -> b) -> MyList a -> MyList b
-
-> listMap :: (a -> b) -> MyList a -> MyList b
-> listMap _ Empty = Empty
-> listMap f (x `Cons` xs) = f x `Cons` listMap f xs
 
 ==============================================================================
 
@@ -198,12 +181,12 @@ A prototypical example of a recursive data structure is a tree.
 
 Here's a binary tree that stores the values in its inner nodes:
 
-> data Tree a = Null | Node a (Tree a) (Tree a) deriving (Show)
+> data Tree a = Null | Node a (Tree a) (Tree a) deriving (Show,Eq)
 
 E.g., a binary tree of integers:
 
 > intTree :: Tree Int
-> intTree = Node 1 (Node 2 (Node 4 Null Null)  Null) (Node 3 Null Null)
+> intTree = Node 1 (Node 2 Null Null) (Node 3 Null Null)
 
 A function that sums the elements in a binary tree of integers:
 
@@ -227,26 +210,11 @@ A function that tests whether an element is contained in a tree:
   that finds the maximum element in a tree. Return an error if the tree is
   empty.
 
-> treeMax :: Ord a => Tree a -> a
-> treeMax Null =  error "Empty tree"
-> treeMax (Node y Null Null) = y 
-> treeMax (Node y left right) 
->    | left == Null   = max y $ treeMax right 
->    | right == Null  = max y $ treeMax left 
->    | otherwise      = max (max y $ treeMax left) $ treeMax right
-
 3.2.
 - Define a function
   treeToList :: Ord a => Tree a -> [a]
   that will collect in a list all elements from inner nodes of a tree by doing
   an in-order (left-root-right) traversal.
-
-> treeToList :: Ord a => Tree a -> [a]
-> treeToList (Node y Null Null) = y : []   
-> treeToList (Node y left right) 
->    | left == Null   = y : treeToList(right) 
->    | right == Null  = treeToList(left) ++ [y]
->    | otherwise      = treeToList(left)  ++ [y] ++ treeToList(right)
 
 3.3.
 - Define a function to prune the tree at a given level (root has level 0).
@@ -273,16 +241,10 @@ Insertion into a binary search tree:
 - Define a function that converts a list into a sorted tree.
   listToTree :: Ord a => [a] -> Tree a
 
-> listToTree :: Ord a => [a] -> Tree a
-> listToTree xs = foldr (\a tree -> treeInsert a tree) Null xs 
-
 4.2.
 - Using 'listToTree' and 'treeToList' defined previously, define these two 
   functions, define:
   sortAndNub :: Ord a => [a] -> [a]
-
-> sortAndNub :: Ord a => [a] -> [a]
-> sortAndNub xs = treeToList $ listToTree xs
 
 === DERIVING TYPE CLASS INSTANCES ============================================
 
@@ -413,23 +375,10 @@ class and all its instances.
 - Define an 'Eq' instance for the 'Weekday' type that works like (==), except
   that two Fridays are never identical.
 
-> instance Eq Weekday where
->   Monday    == Monday    = True
->   Tuesday   == Tuesday   = True
->   Wednesday == Wednesday = True
->   Thursday  == Thursday  = True
->   Friday    == Friday    = False
->   Saturday  == Saturday  = True
->   Sunday    == Sunday    = True
->   _         == _         = False    
-
 5.2.
 - Define 'Person' as an instance of 'Show' type class so that instead of the
   values of partners and children only the respective person names are shown,
   which will enable the print out of an infinite structure of this type.
-
-> instance Show Person where
->   show p =  forename p      
 
 ==============================================================================
 
@@ -438,7 +387,7 @@ What if we want to define an instance of a parametrized type?
 That's not a problem. We simply have to provide a type variable together with
 the type constructor. E.g.:
 
-  instance Eq (Maybe a) 
+  instance Eq a => Eq (Maybe a) 
     Just x  == Just y   = x == y
     Nothing == Nothing  = True
     _       == _        = False
@@ -467,25 +416,10 @@ returns an ordinary type.
 - Define an instance of 'Eq' for 'MyList a' so that two lists are considered 
   equal if they have the same first element.
 
-> instance Eq a => Eq (MyList a) where
->   Empty == _                      = False
->   _     == Empty                  = False
->   (x `Cons` xs) == (y `Cons` ys)  = x == y
-
-
 6.2.
 - Define an instance of 'Eq' for 'Tree a' so that two trees are considered
   equal if they store the same values, regardless of the position of these
   values in the trees, and regardless of duplicates.
-
-> clearTree :: Ord a => Tree a -> [a] 
-> clearTree t = treeToList $ listToTree $ treeToList t
-
-> instance Ord a => Eq (Tree a) where
->   _     ==  Null      = False
->   Null  == _          = False
->   a     == b          = clearTree a == clearTree b 
-
 
 === NEXT =====================================================================
 

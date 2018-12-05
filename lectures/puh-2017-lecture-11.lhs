@@ -13,8 +13,6 @@ v1.0
 
 ==============================================================================
 
-> {-# LANGUAGE FlexibleContexts #-}
-
 > import Data.Char
 > import Data.Functor
 > import Data.Foldable
@@ -107,10 +105,6 @@ We can apply this to any value of a type from the 'Ageing' class.
   that compares the ages relative to the maximum age, so that, say, a 10-year
   old dog is considered older than a 20-year old human.
 
-> compareRelativeAge :: (Ageing a, Ageing b) => a -> b -> Ordering
-> compareRelativeAge a1 a2 = ((maxAge a1) `div` (currentAge a1)) `compare` ((maxAge a2) `div` (currentAge a2))
-
-
 1.2.
 - Define a class 'Nameable' with function
     name :: a -> String
@@ -178,17 +172,6 @@ The same holds for our binary tree:
 - Define '[]' and 'Tree' as instances of 'Takeable'. Take elements from the
   tree using in-order traversal.
 
-> class Takeable t where
->   takeSome :: Int -> t a -> [a]
-
-> instance Takeable [] where
->   takeSome n xs = take n xs
-
-> instance Takeable Tree where
->   takeSome _ Null = error "No more elements"
->   takeSome 0 t    = []
->   takeSome n t    = (peek t) : (takeSome (n-1) (pop t))
-
 2.2.
 - Define a 'Headed' class with functions
     headOf  :: t a -> a      -- takes the head of the structure
@@ -252,13 +235,7 @@ but the latter is used more often.
     tr = Node (Just 1) (Node (Just 2) Null Null) (Node Nothing Null Null)
     mapOnTreeMaybe (+1) tr =>
     Node (Just 2) (Node (Just 3) Null Null) (Node Nothing Null Null)
-
-> mapOnTreeMaybe :: (Functor f1,Functor f2) => (a->b) -> f1( f2 a) -> f1(f2 b)
-> mapOnTreeMaybe = fmap . fmap
-
-> mapOnTreeMaybe' :: (a -> b) -> Tree (Maybe a) -> Tree (Maybe b)
-> mapOnTreeMaybe' = fmap . fmap
-
+  
 3.2.
 - Define a 'RoseTree' type for trees in which each node can have a number of
   subtrees (a forest). As type constructors, use 'RoseTree' and 'RoseEmpty'.
@@ -350,9 +327,6 @@ Even better than that, we can apply any of the following functions from
 - Using 'foldr' from 'Foldable' class define a function
     sumPositive :: (Foldable t, Num a, Ord a) => t a -> a
   that sums the positive elements in a structure of a 't a' type.
-
-> sumPositive :: (Foldable t, Num a, Ord a) => t a -> a
-> sumPositive xs = foldr (\x z -> if x > 0 then x + z else z) 0 xs
 
 4.2.
 - Using 'foldr' define a function 'size' that returns the size of any structure

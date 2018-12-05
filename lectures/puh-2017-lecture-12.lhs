@@ -3,16 +3,15 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2016/2017
+Academic Year 2017/2018
 
 LECTURE 12: Input/output operations
 
-v1.0
+v1.1
 
-(c) 2016 Jan Šnajder
+(c) 2017 Jan Šnajder
 
 ==============================================================================
-
 
 > import Control.Exception
 > import Data.Char
@@ -26,8 +25,6 @@ v1.0
 > import System.FilePath
 > import System.Random
 > import System.FilePath
-> import System.Exit
-> import Data.Set as Set(fromList, member,Set) 
 
 == IO ACTIONS ================================================================
 
@@ -65,7 +62,7 @@ let's forget this for now.)
 
 Finally, here you have "Hello, world!" in Haskell:
 
-> main777 = putStrLn "Hello, world!"
+> main1 = putStrLn "Hello, world!"
 
 This is an action. What is it's type? What is the type of the 'putStrLn'
 function?
@@ -122,9 +119,9 @@ Will the following work?
 
 Or this:
 
- main4 = do
-   putStrLn "Enter your lucky number"
-   putStrLn $ "Your lucky number is " ++ getLine
+  main4 = do
+    putStrLn "Enter your lucky number"
+    putStrLn $ "Your lucky number is " ++ getLine
 
 Function 'putStrLn' expects a string. Similarly, function (++) expects a
 string. But function 'getLine' is not of type 'String' but of type 'IO String'.
@@ -165,28 +162,10 @@ it. The result of the 'getLine' action is a string but we chose not to store it
 - Define a 'main' function that reads in two strings and prints them out
   concatenated and reversed.
 
-> main99 :: IO ()
-> main99 = do
->   putStrLn "Enter first string"
->   s1 <- getLine
->   putStrLn "Enter second string"
->   s2 <- getLine
->   putStrLn $ reverse s1 ++ reverse s2
-
-
 1.2.
 
 - Write a function 'threeNumbers' that reads in three numbers and prints out
   their sum.
-
-> main999 :: IO ()
-> main999 = do
->   putStrLn "Enter three numbers"
->   n1 <- getLine
->   n2 <- getLine
->   n3 <- getLine
->   putStrLn $ show ( (read n1 :: Int) + (read n2 :: Int) + (read n3 :: Int))
-
 - Call this function from within a 'main' function, then compile and run the
   program.
 
@@ -215,13 +194,14 @@ a value into a 'IO' type (or, more generally, into a Monad). E.g.:
 >   return $ number ++ "0"
 >   getLine
 
-This doesn't make a lot of sense but illustrates the point. The return value of
-a do block is the return value of the last action, regardless whether a
-'return' function has appeared before that. So, it is nothing like a return in
-an imperative function (it does not really return from function)!
+The code above doesn't make a lot of sense but illustrates the point. The
+return value of a 'do' block is the return value of the last action, regardless
+whether a 'return' function has appeared before that. So, it is nothing like a
+return in an imperative function (it does not really return from the function)!
 
 (Obviously, "return" is not the best choice for the name of this function. A
-name like "wrap" or "inject" would have been a better choice.)
+name like "wrap" or "inject" would have been a better choice, but now it's too
+late.)
 
 We can of course branch the control flow within an action:
 
@@ -234,8 +214,8 @@ We can of course branch the control flow within an action:
 
 What is important is that both branches return an action of the same type,
 which turns an 'if-then-else' into an action. In the above example, because
-if-then-else is the last action in a do block, its type must be 'IO String', as
-specified by the type signature.
+if-then-else is the last action in a 'do' block, its type must be 'IO String',
+as specified by the type signature.
 
 We can also write the above function like this:
 
@@ -253,7 +233,7 @@ Would the following work?
    number <- getLine
    if number == "" then "7" else number
 
-And why is this not good?
+And why is this no good?
   
   main7 :: IO ()
   main7 = do
@@ -261,7 +241,7 @@ And why is this not good?
     number <- getLine
     return number
 
-We can of course use recursion:
+We can, of course, use recursion in IO actions:
 
 > askNumber7 :: IO String
 > askNumber7 = do
@@ -269,9 +249,10 @@ We can of course use recursion:
 >   number <- getLine
 >   if number == "" then askNumber7 else return number 
 
-This is alright because both branches are actions. Now, what if we want to
-execute several actions in one of the branches? We again need to sequence them
-into a single action using a do block:
+This is alright because both branches are actions. 
+
+Now, what if we want to execute more than one action in one of the branches? We
+again need to sequence them into a single action using a 'do' block:
 
 > askNumber8 :: IO String
 > askNumber8 = do
@@ -289,31 +270,11 @@ into a single action using a do block:
   to the screen as one string, while it returns its total length.
   treeStrings :: IO Int
 
-> threeStrings :: IO Int
-> threeStrings = do
->   putStrLn "Enter three strings"
->   s1 <- getLine
->   s2 <- getLine
->   s3 <- getLine
->   putStrLn $ s1 ++ s2 ++ s3
->   return $ sum $ map length [s1,s2,s3]
-
-
 2.2.
 - Define a function 'askNumber9' that reads in a number and returns that number
   converted into an 'Int'. Input should be repeated until the user enters a
   number (a string containing only digits).
     askNumber9 :: IO Int
-
-> isValidNumber :: String -> Bool
-> isValidNumber xs = foldr (\x z -> z && isDigit x) True xs
-
-> askNumber9 :: IO Int
-> askNumber9 = do
->   putStrLn "Enter number"
->   n <- getLine
->   if isValidNumber n then return (read n :: Int) else askNumber9
-
 - Define a function 'main' that calls 'askNumber9' and outputs the number to
   the screen.
 - Build and run the program.
@@ -328,32 +289,10 @@ into a single action using a do block:
 - Define a 'main' function that prints out the read-in value to the screen.
 - Build and run the program.
 
-> askUser :: String -> (String -> Bool) -> IO String
-> askUser m p = do
->   putStrLn m
->   input <- getLine
->   if p input then return input else askUser m p
-
-
-> askUser' :: Read a => String -> (String -> Bool) -> IO a
-> askUser' m p = do
->   putStrLn m
->   input <- getLine
->   if p input then return $ read input  else askUser' m p
-
 2.4.
 - Define a function that reads in strings until the user inputs an empty
   string, and then returns a list of strings received as input.
     inputStrings :: IO [String]
-
-> inputStrings :: IO [String]
-> inputStrings = do
->   input <- getLine
->   if null input 
->     then return []
->     else do
->       xs <- inputStrings
->       return (input:xs)
 
 == WHERE & LET ===============================================================
 
@@ -381,7 +320,7 @@ So, this is wrong:
     lastname <- map toUpper s2
     return $ s1 ++ " " ++ s2
 
-This is wrong, too:
+As is this:
   
  askName3 :: IO String
  askName3 = do
@@ -391,7 +330,7 @@ This is wrong, too:
        lastname = map toUpper s2
    return $ s1 ++ " " ++ s2
 
-You can also use a 'where' block, but it has to be placed outside of a do
+You can also use a 'where' block, but it has to be placed outside of a 'do'
 block:
 
 > askName4 :: IO String
@@ -399,7 +338,8 @@ block:
 >   s1 <- getLine
 >   s2 <- getLine
 >   return $ upperCase s1 ++ " " ++ upperCase s2
->   where upperCase = map toUpper
+>   where 
+>     upperCase = map toUpper
 
 == COMMON IO FUNCTIONS ========================================================
 
@@ -417,23 +357,30 @@ For example, 'putStr' implemented using 'putChr':
 >   putStr1 xs
 
 The difference between 'print' and 'putStr' is that the former can be applied
-to any type that is a member of 'Show' type class. Actually, 'print' is defined
-as 'putStrLn . show'. As a consequence, if we apply print on a string, it will
-be printed with quotes:
+to any type that is a member of the 'Show' type class. Actually, 'print' is
+defined as 
+
+  print = putStrLn . show
+
+As a consequence, if we apply print on a string, it will be printed with
+quotes:
 
   print "Hello, world!"
 
 In the 'Control.Monad' module you will find a number of functions for managing
-the actions:
+actions:
 
-  when :: Monad m => Bool -> m () -> m ()
+  when :: Applicative f => Bool -> f () -> f ()
   sequence :: Monad m => [m a] -> m [a]
   mapM :: Monad m => (a -> m b) -> [a] -> m [b]
   forever :: Monad m => m a -> m b
 
-Here 'm' is any type that is a member of the 'Monad' type class. We've already
+(Actually, the types for 'sequence' and 'mapM' are a bit more generic.)
+
+Here, 'm' is any type that is a member of the 'Monad' type class. We've already
 said that 'IO' is a member of this class, so all the above functions will work
-with IO actions.
+with IO actions. The 'f' is a type of the 'Applicative' type class, which also
+includes they IO type.
 
 The 'when' function executes the given action if the condition is met,
 otherwise it executes 'return ()'.
@@ -473,10 +420,9 @@ is the same as
 What about this?
 
   main11 = do
-     xs <- sequence [putStrLn "Introducir tres números",getLine,getLine,getLine]
+     xs <- sequence [putStrLn "Introducir tres números", 
+                     getLine, getLine, getLine]
      putStrLn $ "Gracias. Ha introducido " ++ unwords (tail xs)
-
-  - This will not work because haskell lists are homogeneous 
 
 'sequence' is useful for mapping an IO action over a list:
 
@@ -489,13 +435,14 @@ or, more succinctly (because we only have one action):
 
 What is the type of the above function?
 
-Instead, we can define it like this:
+Since we don't really care about the result of the function, we can re-define
+the function like this:
 
 > main14 = do
 >   sequence $ map print [1..10]
 >   return ()
 
-Is this ok?
+Is the following ok?
 
 > main15 = do
 >   sequence $ map (putStrLn . show) [1..10]
@@ -506,8 +453,8 @@ Because 'sequence $ map' is required quite often, there is a standard function
 
 > main16 = mapM print [1..10]
 
-If don't want to collect the results of the individual actions, but only care
-about their side effects, we use the function 'mapM_' instead:
+If we don't want to collect the results of the individual actions, but only
+care about their side effects, we use the function 'mapM_' instead:
 
 > main17 = mapM_ print [1..10]
 
@@ -516,9 +463,9 @@ The difference between 'mapM' and 'mapM_' is visible from their signatures:
   mapM  :: Monad m => (a -> m b) -> [a] -> m [b]
   mapM_ :: Monad m => (a -> m b) -> [a] -> m ()
 
-There's a similar function called 'forM'. It is the same as 'mapM', but with
-flipped arguments, so that the list comes first and then comes the action. This
-is reminiscent of "foreach" loops in imperative languages.
+There's a function similar to 'mapM' called 'forM'. It is the same as 'mapM',
+but with flipped arguments, so that the list comes first and the action comes
+second. This is reminiscent of "foreach" loops in imperative languages.
 
 > main18 = forM [1..10] print
 
@@ -554,46 +501,15 @@ Take a quiet moment to think about the type of this function.
 - Define a function that reads in a number, then reads in that many
   strings, and finally prints these strings in reverse order.
 
-> readStrings = do
->   n <- getLine
->   let nb = (read n :: Int )
->   ys <- replicateM nb getLine
->   forM_ ys (print . reverse)
-
 3.2.
 - Give recursive definitions for 'sequence' and 'sequence_'.
-
-> sequence' :: Monad m => [m a] -> m [a]
-> sequence' []     = return []
-> sequence' (x:xm) = do
->   v <- x
->   vs <- sequence' xm
->   return (v : vs)
-
-> sequence'_ :: Monad m => [m a] -> m () 
-> sequence'_ []     = return ()
-> sequence'_ (x:xm) = do
->   v <- x
->   vs <- sequence'_ xm
->   return ()
-
 
 3.3.
 - Give a recursive definitions for 'mapM' and 'mapM_'.
 
-> mapM' :: Monad m => (a -> m b) -> [a] -> m [b]
-> mapM' f xs = sequence $ map f xs
-
-> mapM'_ :: Monad m => (a -> m b) -> [a] -> m ()
-> mapM'_ f xs = sequence'_ $ map f xs
-
 3.4.
 - Define a function that prints out the Pythagorean triplets whose all sides
   are <=100. Every triplet should be in a separate line.
-
-> pyTriplet :: IO ()
-> pyTriplet = forM_ [ (a,b,c) | a <- [1..100], b <- [a..100], c <- [b..100]] $
->                   \t@(a,b,c) -> when (a*a + b*b == c*c ) $ putStrLn $ show t
 
 == READING FROM STREAMS ======================================================
 
@@ -619,13 +535,13 @@ We can do the same line by line:
 >   unless eof main23
 
 In situations like these, when we eventually want to read in all the data from
-standard input (or a file), it is better to work with STREAMS right away. A
-stream is actually a string that contains the whole input. But, because Haskell
-is lazy, the whole string won't be read at once. It is only when new elements
-of the stream (characters or lines) are required that these will actually be
-read into a string. On the other hand, when an element of the stream (a
-character or a line) is no longer needed, it will be removed from the memory by
-the garbage collector.
+standard input (or a file), it's better to work with STREAMS right away. A
+stream is actually a string that contains the whole input. However, because
+Haskell is lazy, the whole string won't be read in at once. It is only when new
+elements of the stream (characters or lines) are required that these will
+actually be read into the string. On the other hand, when an element of the
+stream (a character or a line) is no longer needed, it will be removed from the
+memory by the garbage collector.
 
 For reading streams from standard input we use the function:
 
@@ -656,9 +572,10 @@ And this at most 10 lines:
 A function that reads lines from standard input and outputs all non-empty
 lines:
 
- main = do
-   s <- getContents
-   putStr . unlines . filter (not . null) $ lines s
+> main27 :: IO ()
+> main27 = do
+>   s <- getContents
+>   putStr . unlines . filter (not . null) $ lines s
 
 Often we need to read some data from standard input, transform them, and print
 to standard output. We can accomplish that succinctly using 'interact':
@@ -682,31 +599,20 @@ For example, we could have defined the above functions like this:
   prints the result to standard output.
     filterOdd :: IO ()
 
-> filterOdd :: IO ()
-> filterOdd = interact (unlines . map snd . filter ( odd . fst) . zip [1..] . lines )
-
 4.2.
 - Define a function that prefixes each line from standard input with a line
   number (number + space).
     numberLines :: IO ()
-
-> numberLines :: IO ()
-> numberLines = interact ( unlines . map (\(n,l) -> show n ++ " " ++ l) . zip [1..] . lines)
 
 4.3.
 - Define a function to remove from standard input all words from a given set of
   words.
     filterWords :: Set String -> IO ()
 
-> filterWords :: Set String -> IO ()
-> filterWords s = interact ( unlines . filt . lines)
->   where filt xs = [ unwords $ foldr (\x z -> if not $ x `member` s then (x:z) else z) [] $ words x | x <- xs ]
-
-
 == WORKING WITH FILES ========================================================
 
-We've been using function from 'System.IO' that work with standard input and
-output. This module also provides similar functions to work with files:
+We've been using functions from 'System.IO' that work with standard input and
+output. The same module also provides similar functions to work with files:
 
   hPutStr :: Handle -> String -> IO ()
   hPutStrLn :: Handle -> String -> IO ()
@@ -719,7 +625,7 @@ the relevant OS information about the file. We get a handle by opening a file:
 
   openFile :: FilePath -> IOMode -> IO Handle
 
-'FilePath' is a synonym for 'String'. 'IOMode' is:
+'FilePath' is a synonym for 'String'. 'IOMode' is defined as follows:
 
   data IOMode =  ReadMode | WriteMode | AppendMode | ReadWriteMode
 
@@ -751,7 +657,7 @@ A genuine Haskeller will write this in a neater way using streams:
 >   putStr s
 >   hClose h
 
-Let's ginger it with line numbers:
+Let's ginger the output with line numbers:
 
 > cat3 :: String -> IO ()
 > cat3 f = do
@@ -809,29 +715,14 @@ A couple of other useful functions from 'System.IO':
 - Define a function
   wc :: FilePath -> IO (Int, Int, Int)
   that counts the number of characters, words, and lines in a file.
-
-> wc :: FilePath -> IO (Int, Int, Int)
-> wc f = withFile f ReadMode $ \h -> do
->   s <- hGetContents h
->   let ls = lines s
->   let ws = concatMap words ls
->   putStrLn $ unwords ws 
->   return (foldr (\x z -> z + length x) 0 ws, length ws, length ls )
-
+- NB: This function will probably misbehave. If this happens, learn more about
+  why it happened here: https://tinyurl.com/y9xobdyd .
+  Even 'seq' won't do the trick; you'll need 'deepseq' from Control.DeepSeq.
 
 5.2. 
 - Define a function
   copyLines :: [Int] -> FilePath -> FilePath -> IO ()
   that copies given lines from the first file into the second.
-
-> copyLines :: [Int] -> FilePath -> FilePath -> IO ()
-> copyLines is f1 f2 = withFile f1 ReadMode $ \h -> do
->   s <- hGetContents h
->   let ls = map snd . filter (\(i,_) -> i`elem` is) . zip [1..] $  lines s
->   withFile f2 WriteMode $ \h2 -> do
->     forM_ ls $ hPutStrLn h2
-
-> main = copyLines [1,2] "tekst" "tekst2"
 
 ==============================================================================
 
@@ -839,7 +730,6 @@ Reading from a stream (using 'hGetContents') and writing to it (using
 'hPutStr') is a common pattern, hence there are functions that make this
 easier, without the need to explicitly open a file and maintain a handle:
 
-w to filter odd eleemnts in list haskell
   readFile  :: FilePath -> IO String
   writeFile :: FilePath -> String -> IO ()
 
@@ -860,8 +750,8 @@ w to filter odd eleemnts in list haskell
 >   writeFile f3 . unlines $ interlace (lines s1) (lines s2)
 >   where interlace xs ys = concat $ zipWith (\x1 x2 -> [x1,x2]) xs ys
 
-Serialization of a data structure (dumping it to a disk) and deserialization
-(reading it from a disk) can be accomplished in a straightforward manner using
+Serialization of a data structure (dumping it to disk) and deserialization
+(reading it from disk) can be accomplished in a straightforward manner using
 'readFile' and 'writeFile', respectively, in a combination with 'read' and
 'show', respectively. For example, serialization of a list:
 
@@ -889,7 +779,7 @@ http://hackage.haskell.org/package/binary
 http://hackage.haskell.org/package/cereal-plus
 http://hackage.haskell.org/package/beamable
 
-Example: we maintain a word translation dictionary, implemented as 'Data.Map',
+EXAMPLE: We maintain a word translation dictionary, implemented as 'Data.Map',
 which we store in a file. We make queries to the dictionary via the keyboard.
 For words which don't exists in the dictionary, we can provide translations
 that are added to the dictionary and stored before exiting.
@@ -951,7 +841,7 @@ E.g., a function that sorts alphabetically the lines in a given file:
 
 > sortFile :: FilePath -> IO ()
 > sortFile f = do
->   (ft,ht) <- openTempFile "" f
+>   (ft, ht) <- openTempFile "" f
 >   s <- readFile f
 >   hPutStr ht . unlines . sort $ lines s
 >   hClose ht
@@ -968,11 +858,6 @@ output and do with it what she wants.
     wordTypes :: FilePath -> IO Int
   to compute the number of distinct words in the given file.
 
-> wordTypes :: FilePath -> IO Int
-> wordTypes f = do
->   s <- readFile f
->   return (length . nub $ words s)
-
 6.2.
 - Define a function 
     diff :: FilePath -> FilePath -> IO ()
@@ -981,44 +866,11 @@ output and do with it what she wants.
   be printed one below the other, prefixed with "<" for the first and ">" for
   the second file.
 
-> formatLines :: [String] -> [String] -> IO ()
-> formatLines []     [] = return ()
-> formatLines (l:ls) [] = do
->   putStrLn $ "< " ++ l  
->   formatLines ls []
-> formatLines [] (l:ls) = do
->   putStrLn $ "> " ++ l  
->   formatLines [] ls
-> formatLines (l1:ls1) (l2:ls2) = do
->   when (l1 /= l2) $ ( do 
->     putStrLn $ "< " ++ l1
->     putStrLn $ "> " ++ l2 )
->   formatLines ls1 ls2
-
-> diff :: FilePath -> FilePath -> IO ()
-> diff f1 f2 = do
->   s1 <- readFile f1
->   s2 <- readFile f2
->   formatLines (lines s1) (lines s2)
-
 6.3.
 - Define a function
     removeSpaces :: FilePath -> IO () 
   that removes trailing spaces from all lines in the given file.
   The function should change the original file.
-
-> clearSpaces :: String -> String
-> clearSpaces s 
->   | null s || last s /= ' '     = s
->   | otherwise                   = clearSpaces $ init s
-
-> removeSpaces :: FilePath -> IO ()
-> removeSpaces f = do
->   (ft,ht) <- openTempFile "" f
->   s <- readFile f
->   hPutStr ht . unlines . map clearSpaces $ lines s
->   hClose ht
->   renameFile ft f
 
 == EXCEPTION HANDLING =========================================================
 
@@ -1031,7 +883,7 @@ Instead they are handled using functions from the 'Control.Exception':
 
 NOTE: Functions for exception handing specifically for IO operations reside in
 the 'System.IO.Error' module. However, we'll be using 'Control.Exception'
-because its more general in that it can be used to catch other kinds of
+because it's more general in that it can be used to catch other kinds of
 exceptions (pure code exceptions and asynchronous exceptions, such as stack
 overflow). Note, however, that even these other kind of exceptions can only be
 caught within an IO monad.
@@ -1079,7 +931,7 @@ For example, you might define a 'withTempFile' function as this:
 > withTempFile :: FilePath -> String -> ((FilePath, Handle) -> IO c) -> IO c
 > withTempFile path f = bracket
 >   (openTempFile path f)
->   (\(f,h) -> do hClose h; removeFile f)
+>   (\(f, h) -> do hClose h; removeFile f)
 
 == ENVIRONMENT VARIABLES ======================================================
 
@@ -1099,7 +951,7 @@ You can use the 'withArgs' function to supply arguments to this function, or
 you can rename the function to 'main' and then run ':main' in ghci. Of course,
 you can also build the program and run it from the command line.
 
-  withArgs ["arg1","arg2"] main13
+  withArgs ["arg1", "arg2"] main13
   :main arg1 arg2
 
 Example: 'sort' that opens a file (if it exists, otherwise it takes the
@@ -1121,6 +973,7 @@ should be using functions from the 'System.Console.GetOpt' module:
 http://www.haskell.org/ghc/docs/latest/html/libraries/base/System-Console-GetOpt.html
 or one of the modules that builds on top of it, such as:
 http://hackage.haskell.org/package/parseargs
+https://hackage.haskell.org/package/optparse-applicative
 
 == EXERCISE 7 =================================================================
 
@@ -1134,30 +987,6 @@ http://hackage.haskell.org/package/parseargs
   read from the standard input. If the file doesn't exist, print an error
   message and exit with failure using 'exitFailure' from 'System.Exit'.
 
-> fileExists :: FilePath -> IO Handle
-> fileExists f = do
->   e <- doesFileExist f
->   if e then openFile f ReadMode 
->        else do
->          putStrLn "File does not exist"
->          exitFailure
-
-> fileHead :: IO ()
-> fileHead = do
->   xs <- getArgs
->   (n,h) <- case xs of
->     []    -> return (10 :: Int, stdin)
->     (f:[]) -> do
->           h <- fileExists f
->           return (10 :: Int, h)
->     (n:f:_) -> do
->           h <- fileExists f
->           return (read n, h)
->
->   s <- hGetContents h
->   putStr . unlines . take n $ lines s 
-
-
 7.2.
 - Define a function
     sortFiles :: IO ()
@@ -1165,24 +994,6 @@ http://hackage.haskell.org/package/parseargs
   File names are provided at the command line.
   "sortFiles file1.txt file2.txt file3.txt"
   If any of the files does not exist, print an error message.
-
-> sortFiles :: IO ()
-> sortFiles = do
->   xs <- getArgs
->   lss <- forM xs (\x -> do
->               e <- doesFileExist x
->               if e then do
->                   h <- openFile x ReadMode
->                   s <- hGetContents h
->                   return (lines s)
->                     else do
->                   putStrLn ("*** File " ++ x ++ " does not exists")
->                   return [""]
->                   )
->  
->   putStrLn $ unlines $ sort $ concat lss
-
->   return ()
 
 == FILE SYSTEM OPERATIONS =====================================================
 
@@ -1289,23 +1100,10 @@ http://hackage.haskell.org/package/MonadRandom
 - Define your own implementation of
     randoms' :: (RandomGen g, Random a) => g -> [a]
 
-> randoms' :: (RandomGen g, Random a) => g -> [a]
-> randoms' g = (fst g') : (randoms' $ snd g')
->   where g' = random g
-
 8.2.
 - Define a function
     randomPositions :: Int -> Int -> Int -> Int -> IO [(Int,Int)]
   that returns a list of randomly generated integer coordinates from within a
   given interval.
     randomPositions 0 10 0 10 => [(2,1),(4,3),(7,7),...
-
-> randomPositions :: Int -> Int -> Int -> Int -> IO [(Int,Int)]
-> randomPositions x1 x2 y1 y2 = do
->   g <- getStdGen
->   g2 <- newStdGen
->   let xs = randomRs (x1,x2) g
->       ys = randomRs (y1,y2) g2
->   return (zip xs ys)
-
 

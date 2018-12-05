@@ -243,8 +243,6 @@ defined like this:
 
 ==============================================================================
 
-WE STOPPED HERE
-
 Let's have a look at two more exotic function.
 
 First is 'reverse'. How would you go about defining the reverse function

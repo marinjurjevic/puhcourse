@@ -3,13 +3,13 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2016/2017
+Academic Year 2017/2018
 
 LECTURE 8: Higher-order functions 2
 
-v1.0
+v1.1
 
-(c) 2016 Jan Šnajder
+(c) 2017 Jan Šnajder
 
 ===============================================================================
 
@@ -92,8 +92,11 @@ So, we can define a chain of compositions. For instance,
 Keep in mind that in such a chain the functions are applied from right to left!
 
 What if we want to define a composition of functions that don't take the same
-number of arguments as input? We'll partially apply the functions so that each
-of them expects exactly one remaining argument.
+number of arguments as input? Well, the number of arguments that the functions
+take is irrelevant. The only thing that is relevant is that the types match:
+the output type of the second function and the input type of the first function
+should be the same. Often, this type matching can be accomplished by partially
+applying functions in the compositional chain, as in the following example:
 
 > initials :: String -> String
 > initials = map toUpper . map head . words
@@ -111,11 +114,13 @@ Sections come in very handy here:
 One more example:
 
 > tokenize :: String -> [String]
-> tokenize = filter (\w -> length w >= 3) . words . map toUpper
+> tokenize = 
+>   filter (\w -> length w >= 3) . words . map toUpper
 
 A better way to define the same:
 
-> tokenize' = filter ((>=3) . length) . words . map toUpper
+> tokenize' = 
+>   filter ((>=3) . length) . words . map toUpper
 
 One last example:
 
@@ -145,17 +150,10 @@ of course use local definitions):
   sumEven :: [Integer] -> Integer
   sumEven [1..10] => 25
 
-> sumEven :: [Integer] -> Integer
-> sumEven = sum . map (snd) . filter (even . fst ) . zip [0..]
-
 1.2.
 - Define 'filterWords ws s' that removes from string 's' all words contained
   in the list 'ws'.
   filterWords :: [String] -> String -> String
-
-filterWords :: [String] -> String -> String
-
-> filterWords ws =  unwords . filter ( `notElem` ws ) . words
 
 1.3.
 - Define 'initials3 d p s' that takes a string 's' and turns it into a string
@@ -203,6 +201,7 @@ This function is useful in combination with 'zip':
 If a function takes more than one argument, in a chain of compositions all
 arguments but one must be fixed. Otherwise said, the function must be applied
 to all its arguments except the last one.
+FIX THIS
 
 This is no good:
 
@@ -235,25 +234,10 @@ be able to refer to it later.
   maxDiff [1,2,3,5,1] => 4
 - Define 'maxMinDiff' that returns the pair (min_difference, max_difference).
 
-> maxDiff :: [Int] -> Int
-> maxDiff xs = maximum . map ( uncurry(-) ) . zip xs $ (drop 1 xs)
-> maxDiff' xs  = maximum . map (abs . uncurry (-)) . zip xs $ tail xs
-
-> maxMinDiff xs = maximum . map(abs . uncurry(-)) . fst $ unzip $ zip (zip xs $ tail xs) (zip xs $ tail xs)
-
-// TODO
- maxMinDiff' xs = (minimum . map . minimummaximum . map(abs . uncurry(-)) . fst $ unzip $ zip (zip xs $ tail xs) (zip xs $ tail xs)
-
-
-
 2.2.
 - Define 'studentsPassed' that takes as input a list [(NameSurname,Score)] and
   returns the names of all students who scored at least 50% of the maximum 
   score.
-
-
- studentsPassed :: [(String,Integer)] -> [String]
-
 
 === USEFUL HIGHER-ORDER FUNCTIONS =============================================
 
@@ -427,13 +411,6 @@ We can now define:
 4.1. 
 - Define 'elem' using 'foldr'.
 
-> elem' :: Eq a => a -> [a] -> Bool
-> elem' e = foldr (\x acc -> x == e || acc) False
-
-// goes through whole list -> not good
-> elem'' :: Eq a => a -> [a] -> Bool
-> elem'' x xs = (foldr (\y acc -> if y == x then 1 + acc else acc) 0 xs) > 0 
-
 4.2.
 - Define 'reverse' using 'foldr'.
 
@@ -454,7 +431,7 @@ Recall the 'sum' function:
 
 > sum4 :: Num a => [a] -> a
 > sum4 xs = sum 0 xs
->   where sum s []     = s              -- 's' is the accumulator
+>   where sum s []     = s        -- 's' is the accumulator
 >         sum s (x:xs) = sum (x+s) xs
 
 Or the 'maximum' function:
@@ -606,8 +583,46 @@ REMARK:
 In terms of space complexity, function 'foldl' is more efficient than 'foldr'.
 However, as noted in Lecture 5, we must keep in mind that Haskell is LAZY and
 will not evaluate the expressions until they are needed. Because of this, we
-can have MEMORY LEAKAGES even when using 'foldl'. More on this in later
-lectures.
+can have MEMORY LEAKAGES even when using 'foldl'.
+
+== PRACTICAL HASKELL: SETTING UP A HASKELL PROJECT ============================
+
+* Hackage: Haskell Package Database
+  https://hackage.haskell.org/
+
+* Cabal: Common Architecture for Building Applications and Libraries
+  http://www.haskell.org/cabal/
+
+Package is a bundle of modules and/or executables. One package can have (and
+usually has) many (hierarchically organized) modules. Once you install the
+package, you simply import the modules (and you don't really care about
+packages anymore).
+
+* Installing packages with Cabal
+  http://www.haskell.org/haskellwiki/Cabal-Install
+
+* "Cabal hell" and Cabal sandboxes
+  http://coldwa.st/e/blog/2013-08-20-Cabal-sandbox.html
+
+Now, let's see how we can define our own package with cabal. Let's go back to
+our last week's example. Recall that we made a program that behaves pretty much
+like:
+
+  cat file.txt | tr ' ' '\n' | sort | uniq -c
+
+Let's look at:
+
+* Modules and exports
+
+* Defining a cabal project
+
+* Semantic versioning
+  http://semver.org/
+  But in Haskell: 
+  http://www.haskell.org/haskellwiki/Package_versioning_policy
+
+More on setting up a Haskell environment:
+http://www.haskell.org/haskellwiki/How_to_write_a_Haskell_program
 
 == NEXT =======================================================================
 
